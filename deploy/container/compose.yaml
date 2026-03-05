@@ -1,0 +1,32 @@
+---
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: '../..'
+      dockerfile: deploy/container/client.Dockerfile
+      args:
+        BUILD_BASE_IMAGE_NAME: ${BUILD_BASE_IMAGE_NAME}
+        BUILD_BASE_IMAGE_TAG: ${BUILD_BASE_IMAGE_TAG}
+        BASE_IMAGE_NAME: ${BASE_IMAGE_NAME}
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+      x-bake:
+        platforms:
+        - linux/amd64
+        - linux/arm64
+    image: ${IMAGE_PREFIX}/client:${VERSION:-latest}
+  server:
+    build:
+      context: '../..'
+      dockerfile: deploy/container/server.Dockerfile
+      args:
+        BUILD_BASE_IMAGE_NAME: ${BUILD_BASE_IMAGE_NAME}
+        BUILD_BASE_IMAGE_TAG: ${BUILD_BASE_IMAGE_TAG}
+        BASE_IMAGE_NAME: ${BASE_IMAGE_NAME}
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+      x-bake:
+        platforms:
+        - linux/amd64
+        - linux/arm64
+    image: ${IMAGE_PREFIX}/server:${VERSION:-latest}

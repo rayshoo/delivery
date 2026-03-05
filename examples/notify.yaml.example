@@ -1,0 +1,46 @@
+notify:
+  slack:
+  - url: https://slack.com/api/chat.postMessage
+    token: ${SLACK_TOKEN}
+    data: |
+      channel: ${DELIVERY_NOTIFY_CHANNEL}
+      blocks:
+      - type: header
+        text:
+          type: plain_text
+          text: ':typingcat: GitLab CI Completed'
+      - type: section
+        fields:
+        - type: mrkdwn
+          text: Start to Sync <${CI_SERVER_URL}/${APP_PATH}|ArgoCD App>
+      attachments:
+      - color: '#2eb886'
+        blocks:
+        - type: section
+          fields:
+          - type: mrkdwn
+            text: |
+              *Pipeline*
+              <${CI_PIPELINE_URL}|ID #${CI_PIPELINE_ID} | IID #${CI_PIPELINE_IID}>
+          - type: mrkdwn
+            text: |
+              *Project*
+              <${CI_PROJECT_URL}|${CI_PROJECT_PATH}>
+          - type: mrkdwn
+            text: '*Branch* <${CI_PROJECT_URL}/-/tree/${CI_COMMIT_BRANCH}|${CI_COMMIT_BRANCH}>'
+          - type: mrkdwn
+            text: '*Commit* <${CI_PROJECT_URL}/-/commit/${CI_COMMIT_SHA}|${CI_COMMIT_SHORT_SHA}>'
+          - type: mrkdwn
+            text: '*User* <${CI_SERVER_URL}/${GITLAB_USER_LOGIN}|${GITLAB_USER_NAME}>'
+          accessory:
+            type: image
+            image_url: ${IMAGE_URL}
+            alt_text: ${GITLAB_USER_NAME}
+        - type: divider
+        - type: section
+          text:
+            type: mrkdwn
+            text: |
+              *Commit Message*
+              ${CI_COMMIT_TITLE}
+              ```${CI_COMMIT_DESCRIPTION}```

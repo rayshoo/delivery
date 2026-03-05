@@ -1,0 +1,12 @@
+#- name: gopass-http
+#  url: https://gitlab.example.com/org/repo.git
+#  http:
+#    username: <username>
+#    password: <password>
+#- name: gopass-ssh
+#  url: git@gitlab.example.com:org/repo.git
+#  ssh:
+#    private-key-file: <filepath>
+#    password: <password>
+#- name: gopass-ssh
+#  url: git@gitlab.example.com:org/repo.git

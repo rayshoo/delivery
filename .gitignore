@@ -1,0 +1,11 @@
+.idea/
+.env
+.server.env
+.client.env
+list.yaml
+specs.yaml
+specs.json
+notify.yaml
+test/
+build/
+*.exe

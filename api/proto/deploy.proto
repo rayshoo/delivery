@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package deploy;
+option go_package = "delivery/api/gen/proto";
+
+import "google/api/annotations.proto";
+
+service Deploy {
+  rpc Deploy(DeployRequest) returns (stream DeployResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/deploy"
+      body: "*"
+    };
+  }
+}
+
+message DeployRequest {
+  CommitSpec commitSpec = 1;
+  repeated DeploySpec deploySpecs = 2;
+}
+
+message CommitSpec {
+  string CommitMessage = 1;
+  optional string CommitUserName = 2;
+  optional string CommitUserEmail = 3;
+}
+
+message DeploySpec {
+  string url = 1;
+  repeated Update updates = 2;
+}
+
+message Update {
+  optional string branch = 1;
+  repeated Path paths = 2;
+}
+
+message Path {
+  string path = 1;
+  optional Kustomize kustomize = 2;
+  repeated Yq yq = 3;
+}
+
+message Kustomize {
+  repeated Image images = 1;
+}
+
+message Image {
+  string name = 1;
+  optional string newName = 2;
+  optional string newTag = 3;
+}
+
+message Yq {
+  string file = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message DeployResponse {
+  optional string message = 1;
+}

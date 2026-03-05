@@ -1,0 +1,14 @@
+.idea/
+.gitignore
+.dockerignore
+.env
+.server.env
+.client.env
+list.yaml
+specs.json
+specs.yaml
+notify.yaml
+test/
+LICENSE
+Makefile
+Dockerfile

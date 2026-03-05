@@ -1,0 +1,31 @@
+[
+  {
+    "url": "<git url>",
+    "updates": [
+      {
+        "branch": "<branch>",
+        "paths": [
+          {
+            "path": "<kustomize file directory>",
+            "kustomize": {
+              "images": [
+                {
+                  "name": "<image name>",
+                  "newName": "<new image name>",
+                  "newTag": "<new image tag>"
+                }
+              ]
+            },
+            "yq": [
+              {
+                "file": "<yaml path>",
+                "key": "<yaml key>",
+                "value": "<yaml value>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
