@@ -6,6 +6,10 @@ A gRPC-based GitOps deployment automation tool that updates Kubernetes manifest 
 
 CI 파이프라인과 GitOps 컨트롤러(ArgoCD, Flux 등)를 연결하는 gRPC 기반 배포 자동화 도구입니다. Kubernetes 매니페스트 저장소의 이미지 태그 및 YAML 값을 자동으로 변경하고 커밋, 푸시합니다.
 
+## Quick Start
+
+[English](./docs/en/quickstart.md) | [한국어](./docs/ko/quickstart.md)
+
 ## Documentation
 
 [English](./docs/en/guide.md) | [한국어](./docs/ko/guide.md)
