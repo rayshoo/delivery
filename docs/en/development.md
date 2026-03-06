@@ -65,14 +65,13 @@ This runs:
 protoc -I api/proto \
   --go_out=api/gen/ --go-grpc_out=api/gen/ --grpc-gateway_out=api/gen/ \
   --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative --grpc-gateway_opt=paths=source_relative \
-  api/proto/deploy.proto api/proto/health.proto
+  api/proto/deploy.proto
 ```
 
 Generated files:
 - `api/gen/deploy.pb.go` — protobuf message definitions
 - `api/gen/deploy_grpc.pb.go` — gRPC server/client stubs
 - `api/gen/deploy.pb.gw.go` — REST gateway reverse proxy
-- `api/gen/health.pb.go`, `health_grpc.pb.go`, `health.pb.gw.go` — health check
 
 ## Go Module Dependencies
 
@@ -86,7 +85,6 @@ Generated files:
 | `github.com/go-git/go-git/v5` | Git operations (clone, fetch, commit, push) |
 | `github.com/fatih/color` | Terminal color output |
 | `github.com/joho/godotenv` | .env file loader |
-| `github.com/sirupsen/logrus` | Logger |
 | `github.com/sirupsen/logrus` | Logging |
 | `gopkg.in/yaml.v3` | YAML parsing |
 

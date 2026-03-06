@@ -65,14 +65,13 @@ make proto
 protoc -I api/proto \
   --go_out=api/gen/ --go-grpc_out=api/gen/ --grpc-gateway_out=api/gen/ \
   --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative --grpc-gateway_opt=paths=source_relative \
-  api/proto/deploy.proto api/proto/health.proto
+  api/proto/deploy.proto
 ```
 
 생성되는 파일:
 - `api/gen/deploy.pb.go` — protobuf 메시지 정의
 - `api/gen/deploy_grpc.pb.go` — gRPC 서버/클라이언트 stub
 - `api/gen/deploy.pb.gw.go` — REST gateway reverse proxy
-- `api/gen/health.pb.go`, `health_grpc.pb.go`, `health.pb.gw.go` — health check 관련
 
 ## Go 모듈 의존성
 
@@ -86,7 +85,6 @@ protoc -I api/proto \
 | `github.com/go-git/go-git/v5` | Git 작업 (clone, fetch, commit, push) |
 | `github.com/fatih/color` | 터미널 컬러 출력 |
 | `github.com/joho/godotenv` | .env 파일 로드 |
-| `github.com/sirupsen/logrus` | 로거 |
 | `github.com/sirupsen/logrus` | 로깅 |
 | `gopkg.in/yaml.v3` | YAML 파싱 |
 
