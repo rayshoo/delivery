@@ -37,9 +37,9 @@ jobs:
         BASE_IMAGE_NAME: alpine
         BASE_IMAGE_TAG: latest
         BUILDX_BAKE_ENTITLEMENTS_FS: "0"
+      working-directory: deploy/container
       run: >
         docker buildx bake
         --push
         --provenance false
-        -f deploy/container/compose.yaml
         server client
