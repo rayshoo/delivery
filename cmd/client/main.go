@@ -4,10 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	pb "delivery/api/gen"
 	"delivery/internal/client/env"
 	"delivery/internal/client/notify"
 	"delivery/internal/client/slack"
-	pb "delivery/api/gen"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"google.golang.org/grpc/credentials"
 
@@ -144,16 +145,41 @@ func readSpecFile(filePath string) []byte {
 	return content
 }
 
+// unmarshalSpecs 는 스펙을 DeploySpec 목록으로 읽습니다.
+//
+// Yq.value 가 google.protobuf.Value 라 encoding/json 으로는 읽을 수 없어
+// protojson 을 씁니다. 덕분에 설정에 쓴 타입이 그대로 전달됩니다 —
+// `value: 2` 는 숫자로, `value: "2"` 는 문자열로 갑니다.
+func unmarshalSpecs(content []byte) ([]*pb.DeploySpec, error) {
+	var raw []json.RawMessage
+	if err := unmarshalJSONOrYAML(content, &raw); err != nil {
+		return nil, err
+	}
+	// 모르는 필드는 무시합니다. 스펙에 주석용 키를 두는 경우가 있습니다.
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	specs := make([]*pb.DeploySpec, 0, len(raw))
+	for i := range raw {
+		var spec pb.DeploySpec
+		if err := opts.Unmarshal(raw[i], &spec); err != nil {
+			return nil, fmt.Errorf("DEPLOY_SPECS[%d]: %w", i, err)
+		}
+		specs = append(specs, &spec)
+	}
+	return specs, nil
+}
+
 func parseDeploySpecs() []*pb.DeploySpec {
 	var specs []*pb.DeploySpec
+	var err error
 	if env.SpecsFile != "" {
-		content := readSpecFile(env.SpecsFile)
-		if err := unmarshalJSONOrYAML(content, &specs); err != nil {
+		specs, err = unmarshalSpecs(readSpecFile(env.SpecsFile))
+		if err != nil {
 			log.Errorln(err.Error())
 			log.Fatalln("failed to parse spec file into deploy spec object")
 		}
 	} else {
-		if err := json.Unmarshal([]byte(env.Specs), &specs); err != nil {
+		specs, err = unmarshalSpecs([]byte(env.Specs))
+		if err != nil {
 			log.Errorln(err.Error())
 			log.Fatalln("failed to parse json into deploy spec object")
 		}
@@ -186,7 +212,7 @@ func validateSpecs(specs []*pb.DeploySpec) {
 					}
 				}
 				for l, yq := range p.Yq {
-					if yq.File == "" || yq.Key == "" || yq.Value == "" {
+					if yq.File == "" || yq.Key == "" || yq.GetValue() == nil {
 						log.Fatalf("all file, key, values of DELIVERY_SPECS[%d].Updates[%d].Paths[%d].Yq[%d] required", i, j, k, l)
 					}
 				}

@@ -7,9 +7,13 @@ import (
 	s "delivery/internal/server/grpc/stream"
 	r "delivery/internal/server/repo"
 	"fmt"
+	"math"
 	"path/filepath"
+	"strconv"
 
 	"github.com/go-git/go-git/v5/plumbing"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var Worker chan work
@@ -100,9 +104,17 @@ func deploy(stream s.Stream, commitSpec *pb.CommitSpec, specs []*pb.DeploySpec) 
 				if p.Yq != nil {
 					for _, yq := range p.Yq {
 						file := filepath.Join(*repo.GetRealPath(&p.Path), yq.File)
+						value, kind, err := yqValue(yq)
+						if err != nil {
+							complete = false
+							log.Errorln(err.Error())
+							s.LoggingAndSendMessage(stream, fmt.Sprintf("the yq value for %s is not usable: %s", file, err.Error()), "error")
+							s.LoggingAndSendMessage(stream, fmt.Sprintf("skip the current '%s' branch", branch), "warn")
+							continue Branch
+						}
 						s.LoggingAndSendMessage(stream, fmt.Sprintf("try updating the %s file", file), "info")
-						s.LoggingAndSendMessage(stream, fmt.Sprintf("path: %s, update: %s=%s", file, yq.Key, yq.Value), "info")
-						err := command.PlainUpdate(ctx, &yq.Key, &yq.Value, &file)
+						s.LoggingAndSendMessage(stream, fmt.Sprintf("path: %s, update: %s=%s", file, yq.Key, value), "info")
+						err = command.PlainUpdate(ctx, &yq.Key, &value, kind, &file)
 						if err != nil {
 							complete = false
 							log.Errorln(err.Error())
@@ -172,4 +184,37 @@ func isValidString(p *string) bool {
 		return false
 	}
 	return true
+}
+
+// yqValue 는 Yq 요청에서 대입할 값과 그 해석 방식을 꺼냅니다.
+//
+// 보내는 쪽이 google.protobuf.Value 로 타입을 명시하므로, 서버는 값의
+// 생김새를 추측하지 않습니다.
+func yqValue(y *pb.Yq) (string, command.ValueKind, error) {
+	v := y.GetValue()
+	if v == nil {
+		return "", command.KindString, fmt.Errorf("value of %s is empty", y.GetKey())
+	}
+	switch k := v.GetKind().(type) {
+	case *structpb.Value_StringValue:
+		return k.StringValue, command.KindString, nil
+	case *structpb.Value_NumberValue:
+		// 정수로 떨어지면 1.0 이 아니라 1 로 씁니다.
+		if !math.IsInf(k.NumberValue, 0) && k.NumberValue == math.Trunc(k.NumberValue) {
+			return strconv.FormatInt(int64(k.NumberValue), 10), command.KindLiteral, nil
+		}
+		return strconv.FormatFloat(k.NumberValue, 'f', -1, 64), command.KindLiteral, nil
+	case *structpb.Value_BoolValue:
+		return strconv.FormatBool(k.BoolValue), command.KindLiteral, nil
+	case *structpb.Value_NullValue:
+		return "null", command.KindLiteral, nil
+	case *structpb.Value_StructValue, *structpb.Value_ListValue:
+		b, err := protojson.Marshal(v)
+		if err != nil {
+			return "", command.KindString, err
+		}
+		return string(b), command.KindJSON, nil
+	default:
+		return "", command.KindString, fmt.Errorf("unknown value kind for %s", y.GetKey())
+	}
 }
