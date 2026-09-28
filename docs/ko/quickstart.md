@@ -132,7 +132,7 @@ curl http://localhost:12011/api/v1/health?service=delivery
         value: v1.2.3
       - file: values.yaml
         key: .replicaCount
-        value: "3"
+        value: 3
 ```
 
 > kustomize와 yq는 같은 path 내에서 함께 사용할 수 있습니다.

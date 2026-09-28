@@ -132,7 +132,7 @@ Define what to update in `specs.yaml`.
         value: v1.2.3
       - file: values.yaml
         key: .replicaCount
-        value: "3"
+        value: 3
 ```
 
 > kustomize and yq can be used together within the same path.

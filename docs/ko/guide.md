@@ -119,17 +119,34 @@ make start
 
 #### yq 값 타입
 
-값의 타입이 자동으로 감지됩니다:
+`value` 는 스펙에 쓴 YAML/JSON 타입 그대로 대입됩니다. 따옴표는 YAML 문법대로만 쓰면 됩니다.
 
-| 값 | 감지 타입 | yq 표현식 |
+| 스펙의 값 | 타입 | 결과 |
 |---|---|---|
-| `v1.0.0` | string | `.key = strenv(YQ_VALUE)` |
-| `123` | number | `.key = 123` |
-| `true` / `false` | boolean | `.key = true` |
-| `null` | null | `.key = null` |
-| 멀티라인 | string | `.key = strenv(YQ_VALUE)` |
+| `v1.0.0` | string | `key: v1.0.0` |
+| `"2"` | string | `key: "2"` (숫자처럼 보여도 문자열) |
+| `2` | number | `key: 2` |
+| `true` / `false` | boolean | `key: true` |
+| `null` | null | `key: null` |
+| 멀티라인 (`\|`, `\|-`) | string | 여러 줄 문자열 그대로 |
+| 매핑 / 리스트 | 구조 | 블록 스타일 YAML 구조로 대입 |
 
-문자열 값을 수동으로 따옴표로 감쌀 필요 없습니다.
+예를 들어 이미지 태그처럼 숫자꼴이지만 문자열이어야 하는 값은 `"2"` 로, 레플리카 수처럼 숫자여야 하는 값은 `2` 로 씁니다.
+
+```yaml
+yq:
+- file: values.yaml
+  key: .image.tag
+  value: "2"          # 문자열
+- file: values.yaml
+  key: .replicaCount
+  value: 3            # 숫자
+- file: values.yaml
+  key: .env
+  value:              # 구조
+  - name: TZ
+    value: Asia/Seoul
+```
 
 ### REST API
 

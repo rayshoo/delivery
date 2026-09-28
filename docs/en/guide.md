@@ -119,17 +119,34 @@ Set via environment variables or `.client.env` file.
 
 #### yq Value Types
 
-Values are automatically type-detected:
+`value` is assigned with the same YAML/JSON type written in the spec. Use quotes only as YAML syntax requires.
 
-| Value | Detected Type | yq Expression |
+| Value in spec | Type | Result |
 |---|---|---|
-| `v1.0.0` | string | `.key = strenv(YQ_VALUE)` |
-| `123` | number | `.key = 123` |
-| `true` / `false` | boolean | `.key = true` |
-| `null` | null | `.key = null` |
-| multi-line | string | `.key = strenv(YQ_VALUE)` |
+| `v1.0.0` | string | `key: v1.0.0` |
+| `"2"` | string | `key: "2"` (string, even if it looks numeric) |
+| `2` | number | `key: 2` |
+| `true` / `false` | boolean | `key: true` |
+| `null` | null | `key: null` |
+| multi-line (`\|`, `\|-`) | string | multi-line string as-is |
+| mapping / list | structure | assigned as block-style YAML |
 
-No need to manually wrap string values in quotes.
+For example, write values that look numeric but must be strings (such as image tags) as `"2"`, and values that must be numbers (such as replica counts) as `2`.
+
+```yaml
+yq:
+- file: values.yaml
+  key: .image.tag
+  value: "2"          # string
+- file: values.yaml
+  key: .replicaCount
+  value: 3            # number
+- file: values.yaml
+  key: .env
+  value:              # structure
+  - name: TZ
+    value: Asia/Seoul
+```
 
 ### REST API
 
