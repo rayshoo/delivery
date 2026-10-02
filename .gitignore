@@ -9,3 +9,6 @@ notify.yaml
 test/
 build/
 *.exe
+
+# 사내 GitLab 전용 파이프라인 설정. 공개 레포에는 올리지 않는다.
+.gitlab-ci.yml
